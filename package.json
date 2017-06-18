@@ -1,0 +1,29 @@
+{
+  "name": "simple-chat-room",
+  "version": "1.0.0",
+  "description": "A simple chat room built with node.js, express.js, and socket.io.",
+  "main": "sever.js",
+  "dependencies": {
+    "express": "^4.15.3",
+    "socket.io": "^2.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daquilino/simple-chat-room.git"
+  },
+  "keywords": [
+    "chocolate",
+    "cream",
+    "pie"
+  ],
+  "author": "Douglas Aquilino",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/daquilino/simple-chat-room/issues"
+  },
+  "homepage": "https://github.com/daquilino/simple-chat-room#readme"
+}

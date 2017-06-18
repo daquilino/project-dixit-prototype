@@ -1,0 +1,27 @@
+#chat-box {
+	background: black;
+	height: 300px;
+	margin: 0 auto;
+	overflow: auto;
+}
+
+p {
+	color : yellow;
+}
+
+#message-form {
+	display: none;
+}
+
+.info{
+	color: black;
+}
+
+body{
+	background: #0ab7eb;
+}
+
+.card{
+	border: solid 1px black;
+	height: 150px;
+}
