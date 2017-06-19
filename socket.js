@@ -1,10 +1,13 @@
+//Dependencies
 const Socket = require('socket.io');
 const Deal = require('./deal');
 
-const numPlayers = 4;  // Sets number of players in game.
 
+//DataTypes
+ // Sets number of players in game.
+const numPlayers = 4; 
 
-
+// user object constructor function
 let user = function(name, socketID)
 {
 	this.ID = socketID;
@@ -21,6 +24,7 @@ let users = []
 // Only User who are playing
 let players = []
 
+// Stores current clue/card
 let currentClue = {
 	card: null,
 	clue: null
@@ -29,8 +33,11 @@ let currentClue = {
 // stores index of players array of user who is current storyteller;
 let storyteller;
 
+// Keeps track rounds
 let currentRound = 1;
 
+
+// ==================================================================================
 module.exports = function (server){
 
 	//envokes socket.io
@@ -64,13 +71,17 @@ module.exports = function (server){
 
 		// instantiates new user with name and socket.id and saves to user array.
 		// Pushes first 'numPlayers' to players array.
-		// When players array has corrent number of users, deals cards
+		// When players array has correct number of users, deals cards
 		// All other players joining room will be observers.  
 		function saveName(name)
 		{
 			let newUser = new user(name, socket.id)
 
-			users.push(newUser);	
+			users.push(newUser);
+
+			// joins user 'socket' to room.  
+			let room = "Main"; 
+			socket.join(room);	
 
 			if(players.length < numPlayers)
 			{
@@ -86,25 +97,20 @@ module.exports = function (server){
 				IO.sockets.in(socket.id).emit("hand", "observer");
 			}	
 			
-			joinRoom();
+			emitRoom();
+			
 		}
 
-		// joins user to room
-		function joinRoom()
-		{	
-			let room = "Main";
-			
-			// joins user 'socket' to room.
-			socket.join(room);
-
-			// this code just gets user to send to client to display
-			// 'hello ___ welcome to the ____ room' in the front-end chat-box.			
+		// Emits user's room to user 
+		// this code just gets user's room to send to client for display
+		// 'hello ___ welcome to the ____ room' in the front-end chat-box.	
+		function emitRoom()
+		{					
 			let user = getUserByID(socket.id)			
 			let data = {};
 			data.name = user.name;
 			data.room = user.room;
-			IO.sockets.in(socket.id).emit("room", data);
-									
+			IO.sockets.in(socket.id).emit("room", data);									
 		}
 
 		//if a user disconnect their username is out with message.
@@ -132,14 +138,13 @@ module.exports = function (server){
 			currentClue.card = data.card;
 			currentClue.clue = data.clue;
 			
-			IO.sockets.in(room).emit("clue", data.clue);
-			
-			
+			IO.sockets.in(room).emit("clue", data.clue);			
 		}
-
 
 	}//END OnConnection
 
+	// returns user object in users based on socket.id;
+	// if user in not found returns false
 	function getUserByID(id)
 	{
 		for(var i = 0; i < users.length; i++)
@@ -147,7 +152,7 @@ module.exports = function (server){
 			if(users[i].ID == id)
 				return users[i];
 		}	
-		return "Anonymous"
+		return false;
 	}
 
 	
