@@ -1,6 +1,6 @@
 var	socket = io.connect(window.location.href);// gets location from window object
 
-//listens for incomeing data named "message" from server
+//ffflistens for incomeing data named "message" from server
 socket.on("message", addToChat );
 
 socket.on("room", displayRoom );
