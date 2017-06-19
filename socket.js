@@ -4,6 +4,7 @@ const Deal = require('./deal');
 const numPlayers = 4;  // Sets number of players in game.
 
 
+
 let user = function(name, socketID)
 {
 	this.ID = socketID;
@@ -28,6 +29,7 @@ let currentClue = {
 // stores index of players array of user who is current storyteller;
 let storyteller;
 
+let currentRound = 1;
 
 module.exports = function (server){
 
@@ -40,16 +42,14 @@ module.exports = function (server){
 	// callback function for IO.on
 	function OnConnection(socket)
 	{
-		//listens for incoming data named "message" from client
-		socket.on("message", getMessage);
-
+		//listens for incoming data from user on socket.
+		socket.on("message", emitMessage);
 		socket.on("name", saveName);
-
 		socket.on("disconnect", disconnect);
-
 		socket.on("clue", getClue);
 		
-		function getMessage(data)
+		//emits message from user in room to others in room.
+		function emitMessage(data)
 		{		
 			// finds and saves user by socket.id
 			let currentUser = getUserByID(socket.id);
@@ -99,12 +99,10 @@ module.exports = function (server){
 
 			// this code just gets user to send to client to display
 			// 'hello ___ welcome to the ____ room' in the front-end chat-box.			
-			let user = getUserByID(socket.id)
-			
+			let user = getUserByID(socket.id)			
 			let data = {};
 			data.name = user.name;
 			data.room = user.room;
-		
 			IO.sockets.in(socket.id).emit("room", data);
 									
 		}
