@@ -1,4 +1,8 @@
 const Socket = require('socket.io');
+const Deal = require('./deal');
+
+const numPlayers = 4;  // Sets number of players in game.
+
 
 let user = function(name, socketID)
 {
@@ -6,11 +10,24 @@ let user = function(name, socketID)
 	this.name = name;
 	this.room = "Main";
 	this.hand = [];
+	this.position;  //(p)layer,  (s)toryteller or (o)bserver *May not need
+	this.score = 0;
 }
 
-let users = [];
+//ALL users in room
+let users = []
 
-const Deal = require('./deal');
+// Only User who are playing
+let players = []
+
+let currentClue = {
+	card: null,
+	clue: null
+};
+
+// stores index of players array of user who is current storyteller;
+let storyteller;
+
 
 module.exports = function (server){
 
@@ -29,6 +46,8 @@ module.exports = function (server){
 		socket.on("name", saveName);
 
 		socket.on("disconnect", disconnect);
+
+		socket.on("clue", getClue);
 		
 		function getMessage(data)
 		{		
@@ -43,30 +62,51 @@ module.exports = function (server){
 			IO.sockets.in(room).emit("message", data);
 		}
 
+		// instantiates new user with name and socket.id and saves to user array.
+		// Pushes first 'numPlayers' to players array.
+		// When players array has corrent number of users, deals cards
+		// All other players joining room will be observers.  
 		function saveName(name)
 		{
-			users.push(new user(name, socket.id));
+			let newUser = new user(name, socket.id)
+
+			users.push(newUser);	
+
+			if(players.length < numPlayers)
+			{
+				players.push(newUser);
+				
+				if (players.length === numPlayers){
+					Deal.deal(players);
+					sendHandToPlayers();
+				}
+			}
+			else
+			{
+				IO.sockets.in(socket.id).emit("hand", "observer");
+			}	
+			
 			joinRoom();
 		}
 
+		// joins user to room
 		function joinRoom()
 		{	
 			let room = "Main";
-			socket.join(room);
 			
-			// gets user by socket.id
+			// joins user 'socket' to room.
+			socket.join(room);
+
+			// this code just gets user to send to client to display
+			// 'hello ___ welcome to the ____ room' in the front-end chat-box.			
 			let user = getUserByID(socket.id)
 			
 			let data = {};
 			data.name = user.name;
 			data.room = user.room;
-
+		
 			IO.sockets.in(socket.id).emit("room", data);
-
-			if (usersInRoom(room) === 3){
-				Deal.deal(users);
-				sendHandToPlayers();
-			}
+									
 		}
 
 		//if a user disconnect their username is out with message.
@@ -76,26 +116,30 @@ module.exports = function (server){
 			console.log(getUserByID(socket.id).name, 'disconnected');
 		}
 
-		// returns number of users in room
-		function usersInRoom(room)
-		{
-			let usersInRoom = Object.keys(IO.sockets.adapter.rooms[room].sockets);
-			console.log("users in room", usersInRoom.length);
-			return usersInRoom.length;
-		}
-
-
 		//emits to each user their dealt hand
-		function sendHandToPlayers(){
-			for(let i = 0; i < users.length; i++)
+		function sendHandToPlayers()
+		{
+			for(let i = 0; i < players.length; i++)
 			{
-				let user = users[i];
+				let user = players[i];
 				IO.sockets.in(user.ID).emit("hand", user.hand);
 			}	
-
 		}
 
-	
+		// when clue is sent to socket this is done.
+		function getClue(data)
+		{
+			let room = "Main";
+			
+			currentClue.card = data.card;
+			currentClue.clue = data.clue;
+			
+			IO.sockets.in(room).emit("clue", data.clue);
+			
+			
+		}
+
+
 	}//END OnConnection
 
 	function getUserByID(id)
@@ -111,3 +155,15 @@ module.exports = function (server){
 	
 }// END module.exports
 
+/*
+	Dont need any more.  Use players array instead.
+
+	// returns number of users in room 
+	function usersInRoom(room)
+	{
+		let usersInRoom = Object.keys(IO.sockets.adapter.rooms[room].sockets);
+		console.log("users in room", usersInRoom.length);
+		return usersInRoom.length;
+	}
+
+*/		

@@ -25,3 +25,7 @@ body{
 	border: solid 1px black;
 	height: 150px;
 }
+
+#clue-form {
+	display: none;
+}

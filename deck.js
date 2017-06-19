@@ -1,8 +1,8 @@
-
+// creates and returns an array of 100 cards.
 
 module.exports =  function(users){
 	
-	// array for dummy deck
+	// array for dummy deck for 100 cards
 	let deck = new Array(100);
 
 	// constructor function for card
