@@ -1,4 +1,4 @@
-#Project 3 - Dixit - prototype
+# Project 3 - Dixit - prototype
 
 ## General Game Rules
 - Each player starts the game with six random cards. 
